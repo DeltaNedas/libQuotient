@@ -460,6 +460,14 @@ Room::Room(Connection* connection, QString id, JoinState initialJoinState)
             emit baseStateLoaded();
         return this == r; // loadedRoomState fires only once per room
     });
+    connectSingleShot(this, &Room::encryption, this, [=](){
+        connection->encryptionUpdate(this);
+    });
+    connect(this, &Room::userAdded, this, [=](){
+        if(usesEncryption()) {
+            connection->encryptionUpdate(this);
+        }
+    });
     qCDebug(STATE) << "New" << toCString(initialJoinState) << "Room:" << id;
 }
 
